@@ -4,7 +4,7 @@ import asyncio
 import json
 import textwrap
 from typing import Dict, Any, List
-
+import logging
 import os
 import sys
 from pathlib import Path
@@ -379,9 +379,13 @@ def main() -> None:
         if use_agent and prompt.strip():
             with st.spinner("Calling Utsava Sathi API..."):
                 try:
+                    logging.info(f"Calling Utsava Sathi API with prompt: {prompt.strip()}")
                     resp = requests.post(
                         "http://127.0.0.1:8006/plan",
-                        json={"prompt": prompt.strip()},
+                        json={
+                          "prompt": prompt.strip(),
+                          "use_multi_agent": True
+                        },
                         timeout=60,
                     )
                     resp.raise_for_status()

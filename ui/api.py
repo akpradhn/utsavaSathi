@@ -47,6 +47,19 @@ except Exception as exc:
     )
     raise
 
+# Try to import coordinator agent (multi-agent system)
+try:
+    from utsava_agent.coordinator import coordinator_agent  # type: ignore
+    MULTI_AGENT_AVAILABLE = True
+    logger.info("COORDINATOR_AGENT_IMPORTED: Successfully imported coordinator_agent")
+except Exception as exc:
+    MULTI_AGENT_AVAILABLE = False
+    logger.warning(
+        "COORDINATOR_AGENT_IMPORT_FAILED: Multi-agent system not available. "
+        "Error=%s. Falling back to single agent mode.",
+        exc,
+    )
+
 load_dotenv()
 logger.info("ENV_LOADED: Environment variables loaded from .env file")
 
@@ -60,6 +73,7 @@ class PlanRequest(BaseModel):
     """Incoming festival planning request."""
 
     prompt: str  # free-form text describing festival + family context
+    use_multi_agent: bool = False  # Use multi-agent coordinator if available
 
 
 @app.post("/plan")
@@ -70,14 +84,32 @@ async def plan_festival(req: PlanRequest) -> Dict[str, Any]:
     """
     logger.info(
         "PLAN_REQUEST_RECEIVED: Processing festival planning request. "
-        "Prompt length=%d, Prompt preview=%s",
+        "Prompt length=%d, Prompt preview=%s, Use multi-agent=%s",
         len(req.prompt),
         req.prompt[:100] if len(req.prompt) > 100 else req.prompt,
+        req.use_multi_agent and MULTI_AGENT_AVAILABLE,
     )
 
+    # Select agent based on request and availability
+    if req.use_multi_agent and MULTI_AGENT_AVAILABLE:
+        agent = coordinator_agent
+        agent_type = "multi-agent coordinator"
+    else:
+        agent = root_agent
+        agent_type = "single agent"
+        if req.use_multi_agent:
+            logger.warning(
+                "MULTI_AGENT_REQUESTED_BUT_UNAVAILABLE: Multi-agent requested but not available. "
+                "Using single agent mode."
+            )
+
+    logger.info(f"AGENT_SELECTED: Using {agent_type} for this request")
+
     # Pass an explicit app_name to avoid ADK's "app name mismatch" warning.
-    runner = InMemoryRunner(agent=root_agent, app_name="utsava_agent")
-    logger.debug("RUNNER_CREATED: InMemoryRunner initialized with app_name=utsava_agent")
+    runner = InMemoryRunner(agent=agent, app_name="utsava_agent")
+    logger.debug(
+        f"RUNNER_CREATED: InMemoryRunner initialized with {agent_type}, app_name=utsava_agent"
+    )
     
     try:
         # Use run_debug() which returns a list of events
