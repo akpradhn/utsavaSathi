@@ -11,6 +11,7 @@ It follows the style and patterns from the Google AI Agents Intensive
 
 from __future__ import annotations
 
+import logging
 import os
 
 from dotenv import load_dotenv
@@ -19,15 +20,26 @@ from google.adk.models.google_llm import Gemini
 from google.adk.tools import google_search
 from google.genai import types
 
+# Configure logging for agent module
+logger = logging.getLogger(__name__)
+
 load_dotenv()
 
 API_KEY = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
 
 if not API_KEY:
+    logger.error(
+        "API_KEY_MISSING: GOOGLE_API_KEY or GEMINI_API_KEY not found in environment or .env file. "
+        "Checked env vars: GOOGLE_API_KEY=%s, GEMINI_API_KEY=%s",
+        bool(os.getenv("GOOGLE_API_KEY")),
+        bool(os.getenv("GEMINI_API_KEY")),
+    )
     raise RuntimeError(
         "GOOGLE_API_KEY or GEMINI_API_KEY must be set in your environment or .env file "
         "for the Utsava Sathi ADK agent to call Gemini."
     )
+
+logger.info("API_KEY_LOADED: Successfully loaded API key from environment (length=%d)", len(API_KEY))
 
 retry_config = types.HttpRetryOptions(
     attempts=5,
@@ -90,6 +102,8 @@ root_agent = Agent(
         model="gemini-2.5-flash-lite",
         api_key=API_KEY,
         retry_options=retry_config,
+        # Ask Gemini to return pure JSON so it is easy to parse.
+        response_mime_type="application/json",
     ),
     description=(
         "Odisha-first festival planning agent that generates FestivalPlan JSON "
@@ -97,22 +111,30 @@ root_agent = Agent(
     ),
     instruction=(
         "You are Utsava Sathi, a helpful Odisha-first festival planning assistant.\n"
-        "Given a user request (for example: "
-        "'Plan Kartika Purnima in Bhubaneswar for a family of 4 with a small child'), "
-        "you MUST:\n"
-        "1. Use the google_search tool whenever you need up-to-date information "
-        "   about the festival, Odia traditions, or local places.\n"
-        "2. Think step by step about each part of the plan: festival_overview, "
-        "   pre_festival, festival_day, shareables, and metadata.\n"
-        "3. Respond with a SINGLE JSON object that EXACTLY matches this schema "
-        "(no extra top-level keys, no renaming fields):\n\n"
+        "The user will describe a festival and their family context. Your job is to "
+        "produce a single FestivalPlan JSON object that strictly follows this "
+        "schema:\n\n"
         f"{FESTIVAL_PLAN_SCHEMA}\n\n"
-        "Fill all keys. Use empty lists where appropriate, but never omit any "
-        "required key. Do not wrap the JSON in backticks or add commentary."
+        "RESPONSE RULES (VERY IMPORTANT):\n"
+        "- Respond with **JSON only**. Do not include backticks, markdown, or any "
+        "  explanatory text before or after the JSON.\n"
+        "- The top-level value must be a single JSON object with exactly these five "
+        "  keys: festival_overview, pre_festival, festival_day, shareables, metadata.\n"
+        "- All nested keys shown in the schema must be present. Use empty lists [] or "
+        "  empty strings \"\" if you have no data, but never omit required keys.\n"
+        "- Use valid JSON escaping (double quotes for strings, no single-quote escapes "
+        "  like \\' ).\n"
+        "- When in doubt, prefer correctness of JSON over extra wording."
     ),
     tools=[google_search],
 )
 
-print("✅ Utsava Sathi ADK root_agent defined.")
+logger.info(
+    "ROOT_AGENT_INITIALIZED: Utsava Sathi ADK root_agent defined successfully. "
+    "Model=%s, Tools=%d, ResponseMimeType=%s",
+    "gemini-2.5-flash-lite",
+    len([google_search]),
+    "application/json",
+)
 
 
