@@ -1,0 +1,7 @@
+#!/bin/bash
+# Git commit agent wrapper
+# Usage: git commit-agent [--auto-commit] [--edit]
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+python3 "$SCRIPT_DIR/commit_agent.py" "$@"
+
