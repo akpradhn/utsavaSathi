@@ -288,7 +288,7 @@ def render_pre_festival(data: Dict[str, Any]) -> None:
                 suggestion = place.get("suggestion", "")
                 query = name.replace(" ", "+")
                 
-                st.markdown(
+            st.markdown(
                     f"""
                     <div style="
                         background: white;
@@ -345,17 +345,19 @@ def render_pre_festival(data: Dict[str, Any]) -> None:
             st.info("No places to visit information available")
 
     with tab_timeline:
-        # Schedule timeline
+        # Schedule timeline - Layout: T-3 and T-1 side by side, T-7 below spanning full width
         schedule = data.get("schedule", {})
         if schedule:
             st.markdown("#### 📅 Timeline")
-            col_t7, col_t3, col_t1 = st.columns(3)
             
-            with col_t7:
-                t7_items = schedule.get("T-7_days", [])
-                if t7_items:
-                    items_html = "".join([f"<li style='margin-bottom: 8px; color: #555;'>{item}</li>" for item in t7_items])
-            st.markdown(
+            # Top row: T-3 and T-1 side by side
+            col_t3, col_t1 = st.columns(2)
+            
+            with col_t3:
+                t3_items = schedule.get("T-3_days", [])
+                if t3_items:
+                    items_html = "".join([f"<li style='margin-bottom: 8px; color: #555; line-height: 1.5;'>{item}</li>" for item in t3_items])
+                    st.markdown(
                         f"""
                         <div style="
                             background: white;
@@ -375,42 +377,6 @@ def render_pre_festival(data: Dict[str, Any]) -> None:
                                 gap: 8px;
                             ">
                                 <span>📅</span>
-                                <span>T-7 days</span>
-                            </div>
-                            <div style="padding: 16px;">
-                                <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
-                                    {items_html}
-                                </ul>
-                            </div>
-                        </div>
-                        """,
-                        unsafe_allow_html=True,
-                    )
-            
-            with col_t3:
-                t3_items = schedule.get("T-3_days", [])
-                if t3_items:
-                    items_html = "".join([f"<li style='margin-bottom: 8px; color: #555;'>{item}</li>" for item in t3_items])
-                    st.markdown(
-                        f"""
-                        <div style="
-                            background: white;
-                            border-radius: 12px;
-                            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-                            overflow: hidden;
-                            margin-bottom: 16px;
-                        ">
-                            <div style="
-                                background: {COLORS['marigold']};
-                                padding: 12px 16px;
-                                color: white;
-                                font-weight: 600;
-                                font-size: 0.95rem;
-                                display: flex;
-                                align-items: center;
-                                gap: 8px;
-                            ">
-                                <span>📆</span>
                                 <span>T-3 days</span>
                             </div>
                             <div style="padding: 16px;">
@@ -426,7 +392,7 @@ def render_pre_festival(data: Dict[str, Any]) -> None:
             with col_t1:
                 t1_items = schedule.get("T-1_day", [])
                 if t1_items:
-                    items_html = "".join([f"<li style='margin-bottom: 8px; color: #555;'>{item}</li>" for item in t1_items])
+                    items_html = "".join([f"<li style='margin-bottom: 8px; color: #555; line-height: 1.5;'>{item}</li>" for item in t1_items])
                     st.markdown(
                         f"""
                         <div style="
@@ -458,6 +424,42 @@ def render_pre_festival(data: Dict[str, Any]) -> None:
                         """,
                         unsafe_allow_html=True,
                     )
+            
+            # Bottom: T-7 spanning full width
+            t7_items = schedule.get("T-7_days", [])
+            if t7_items:
+                items_html = "".join([f"<li style='margin-bottom: 8px; color: #555; line-height: 1.5;'>{item}</li>" for item in t7_items])
+                st.markdown(
+                    f"""
+                    <div style="
+                        background: white;
+                        border-radius: 12px;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                        overflow: hidden;
+                        margin-bottom: 16px;
+                    ">
+                        <div style="
+                            background: {COLORS['saffron']};
+                            padding: 12px 16px;
+                            color: white;
+                            font-weight: 600;
+                            font-size: 0.95rem;
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                        ">
+                            <span>📅</span>
+                            <span>T-7 days</span>
+                        </div>
+                        <div style="padding: 16px;">
+                            <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
+                                {items_html}
+                            </ul>
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
         else:
             st.info("No timeline schedule available")
 
@@ -467,7 +469,7 @@ def render_pre_festival(data: Dict[str, Any]) -> None:
         if travel.get("is_travel_suggested", False):
             note = travel.get("note", "")
             st.markdown(
-            f"""
+                f"""
                 <div style="
                     background: {COLORS['deep_green_bg']};
                     padding: 20px;
@@ -482,9 +484,9 @@ def render_pre_festival(data: Dict[str, Any]) -> None:
                         {note}
                     </div>
                 </div>
-            """,
-            unsafe_allow_html=True,
-        )
+                """,
+                unsafe_allow_html=True,
+            )
         else:
             st.info("No travel recommendations for this festival")
 
