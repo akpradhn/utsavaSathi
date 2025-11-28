@@ -9,10 +9,11 @@ Usage: python commit_agent.py [--auto-commit]
 from __future__ import annotations
 
 import argparse
+import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 
 
 def run_git_command(cmd: List[str]) -> Tuple[str, int]:
@@ -82,11 +83,176 @@ def analyze_changes(files: List[Tuple[str, str]]) -> dict:
     return analysis
 
 
-def generate_commit_message(analysis: dict, diff: str) -> str:
-    """Generate a commit message based on the analysis."""
+def analyze_diff_content(diff: str, files: List[Tuple[str, str]]) -> Dict[str, Dict]:
+    """Analyze the actual diff content to understand what changed."""
+    file_analysis = {}
+    
+    # Split diff by file
+    current_file = None
+    current_diff = []
+    
+    for line in diff.split("\n"):
+        # Match file header: diff --git a/path b/path or --- a/path / +++ b/path
+        if line.startswith("diff --git"):
+            if current_file and current_diff:
+                file_analysis[current_file] = analyze_file_diff(current_file, "\n".join(current_diff))
+            # Extract filename from diff --git a/file b/file
+            match = re.search(r"diff --git a/(.+?) b/(.+?)$", line)
+            if match:
+                current_file = match.group(2)
+                current_diff = [line]
+            else:
+                current_file = None
+                current_diff = []
+        elif current_file:
+            current_diff.append(line)
+    
+    # Process last file
+    if current_file and current_diff:
+        file_analysis[current_file] = analyze_file_diff(current_file, "\n".join(current_diff))
+    
+    return file_analysis
+
+
+def analyze_file_diff(file_path: str, diff_content: str) -> Dict:
+    """Analyze diff for a single file to extract meaningful changes."""
+    analysis = {
+        "additions": 0,
+        "deletions": 0,
+        "functions_added": [],
+        "functions_modified": [],
+        "imports_added": [],
+        "imports_removed": [],
+        "config_changes": [],
+        "key_changes": [],
+    }
+    
+    lines = diff_content.split("\n")
+    in_hunk = False
+    
+    for line in lines:
+        # Count additions and deletions
+        if line.startswith("+") and not line.startswith("+++"):
+            analysis["additions"] += 1
+            content = line[1:].strip()
+            
+            # Detect function definitions
+            func_match = re.search(r"^(?:def|async def|class)\s+(\w+)", content)
+            if func_match:
+                analysis["functions_added"].append(func_match.group(1))
+            
+            # Detect imports
+            if content.startswith("import ") or content.startswith("from "):
+                analysis["imports_added"].append(content)
+            
+            # Detect configuration changes
+            if "=" in content and not content.startswith("#"):
+                key_match = re.search(r"^(\w+)\s*=", content)
+                if key_match:
+                    analysis["config_changes"].append(f"Added: {key_match.group(1)}")
+            
+        elif line.startswith("-") and not line.startswith("---"):
+            analysis["deletions"] += 1
+            content = line[1:].strip()
+            
+            # Detect removed functions
+            func_match = re.search(r"^(?:def|async def|class)\s+(\w+)", content)
+            if func_match:
+                analysis["functions_modified"].append(func_match.group(1))
+            
+            # Detect removed imports
+            if content.startswith("import ") or content.startswith("from "):
+                analysis["imports_removed"].append(content)
+            
+            # Detect removed configuration
+            if "=" in content and not content.startswith("#"):
+                key_match = re.search(r"^(\w+)\s*=", content)
+                if key_match:
+                    analysis["config_changes"].append(f"Removed: {key_match.group(1)}")
+    
+    return analysis
+
+
+def generate_text_description(analysis: dict, diff_analysis: Dict[str, Dict], files: List[Tuple[str, str]]) -> str:
+    """Generate a human-readable description of the changes."""
+    descriptions = []
+    
     new_files = analysis["new_files"]
     modified_files = analysis["modified_files"]
     deleted_files = analysis["deleted_files"]
+    
+    # Describe new files
+    if new_files:
+        for file_path in new_files:
+            path = Path(file_path)
+            file_analysis = diff_analysis.get(file_path, {})
+            
+            if path.suffix == ".py":
+                funcs = file_analysis.get("functions_added", [])
+                if funcs:
+                    descriptions.append(f"Added {path.name} with {len(funcs)} function(s): {', '.join(funcs[:3])}")
+                else:
+                    descriptions.append(f"Added {path.name}")
+            elif path.suffix == ".sh":
+                descriptions.append(f"Added {path.name} script")
+            elif path.suffix == ".md":
+                descriptions.append(f"Added {path.name} documentation")
+            elif path.name == ".gitignore":
+                descriptions.append("Added .gitignore with project exclusions")
+            elif "requirements" in path.name.lower():
+                descriptions.append("Added/updated dependencies")
+            else:
+                descriptions.append(f"Added {path.name}")
+    
+    # Describe modified files
+    if modified_files:
+        for file_path in modified_files:
+            path = Path(file_path)
+            file_analysis = diff_analysis.get(file_path, {})
+            additions = file_analysis.get("additions", 0)
+            deletions = file_analysis.get("deletions", 0)
+            funcs_added = file_analysis.get("functions_added", [])
+            funcs_modified = file_analysis.get("functions_modified", [])
+            
+            if path.suffix == ".py":
+                changes = []
+                if funcs_added:
+                    changes.append(f"added {len(funcs_added)} function(s)")
+                if funcs_modified:
+                    changes.append(f"modified {len(funcs_modified)} function(s)")
+                if additions > 0 or deletions > 0:
+                    if not changes:
+                        changes.append(f"{additions} addition(s), {deletions} deletion(s)")
+                
+                if changes:
+                    descriptions.append(f"Updated {path.name}: {', '.join(changes)}")
+                else:
+                    descriptions.append(f"Updated {path.name}")
+            else:
+                if additions > 0 or deletions > 0:
+                    descriptions.append(f"Updated {path.name} ({additions} additions, {deletions} deletions)")
+                else:
+                    descriptions.append(f"Updated {path.name}")
+    
+    # Describe deleted files
+    if deleted_files:
+        for file_path in deleted_files:
+            descriptions.append(f"Removed {Path(file_path).name}")
+    
+    return "\n".join(descriptions) if descriptions else "Updated files"
+
+
+def generate_commit_message(analysis: dict, diff: str, files: List[Tuple[str, str]]) -> str:
+    """Generate a commit message based on the analysis and diff content."""
+    new_files = analysis["new_files"]
+    modified_files = analysis["modified_files"]
+    deleted_files = analysis["deleted_files"]
+    
+    # Analyze diff content to understand what actually changed
+    diff_analysis = analyze_diff_content(diff, files)
+    
+    # Generate descriptive text about changes
+    description_text = generate_text_description(analysis, diff_analysis, files)
     
     # Determine the main change type
     if new_files and not modified_files and not deleted_files:
@@ -98,10 +264,10 @@ def generate_commit_message(analysis: dict, diff: str) -> str:
     else:
         change_type = "Update"
     
-    # Generate title based on files
+    # Generate title based on files and content
     title_parts = []
     
-    # Check for common patterns
+    # Check for common patterns in file names
     if any("test" in f.lower() for f in new_files + modified_files):
         title_parts.append("tests")
     if any("api" in f.lower() for f in new_files + modified_files):
@@ -119,7 +285,11 @@ def generate_commit_message(analysis: dict, diff: str) -> str:
     if any("requirements" in f.lower() for f in new_files + modified_files):
         title_parts.append("dependencies")
     
-    # If no specific patterns, use file count
+    # Analyze diff for more context
+    total_additions = sum(da.get("additions", 0) for da in diff_analysis.values())
+    total_deletions = sum(da.get("deletions", 0) for da in diff_analysis.values())
+    
+    # If no specific patterns, use file count or diff stats
     if not title_parts:
         total_changes = len(new_files) + len(modified_files) + len(deleted_files)
         if total_changes == 1:
@@ -130,37 +300,37 @@ def generate_commit_message(analysis: dict, diff: str) -> str:
     
     title = f"{change_type}: {', '.join(title_parts)}"
     
-    # Generate body
+    # Generate body with meaningful descriptions
     body_lines = []
     
-    if new_files:
-        body_lines.append("New files:")
-        for f in new_files[:10]:  # Limit to 10 files
-            body_lines.append(f"- {f}")
-        if len(new_files) > 10:
-            body_lines.append(f"- ... and {len(new_files) - 10} more")
+    # Add the generated description text
+    if description_text:
+        body_lines.append(description_text)
     
-    if modified_files:
-        body_lines.append("Modified files:")
-        for f in modified_files[:10]:
-            body_lines.append(f"- {f}")
-        if len(modified_files) > 10:
-            body_lines.append(f"- ... and {len(modified_files) - 10} more")
+    # Add summary statistics if significant
+    if total_additions > 0 or total_deletions > 0:
+        body_lines.append(f"\nChanges: +{total_additions} additions, -{total_deletions} deletions")
     
-    if deleted_files:
-        body_lines.append("Deleted files:")
-        for f in deleted_files[:10]:
-            body_lines.append(f"- {f}")
-        if len(deleted_files) > 10:
-            body_lines.append(f"- ... and {len(deleted_files) - 10} more")
+    # Add function-level details for Python files
+    python_changes = []
+    for file_path, file_analysis in diff_analysis.items():
+        if Path(file_path).suffix == ".py":
+            funcs_added = file_analysis.get("functions_added", [])
+            funcs_modified = file_analysis.get("functions_modified", [])
+            if funcs_added or funcs_modified:
+                file_name = Path(file_path).name
+                details = []
+                if funcs_added:
+                    details.append(f"added: {', '.join(funcs_added[:5])}")
+                if funcs_modified:
+                    details.append(f"modified: {', '.join(funcs_modified[:5])}")
+                if details:
+                    python_changes.append(f"{file_name}: {', '.join(details)}")
     
-    # Add file type summary
-    if analysis["file_types"]:
-        file_types_str = ", ".join(
-            f"{ext or 'no ext'}({count})" 
-            for ext, count in sorted(analysis["file_types"].items())
-        )
-        body_lines.append(f"\nFile types: {file_types_str}")
+    if python_changes:
+        body_lines.append("\nFunction changes:")
+        for change in python_changes[:5]:  # Limit to 5 files
+            body_lines.append(f"- {change}")
     
     body = "\n".join(body_lines) if body_lines else ""
     
@@ -201,7 +371,7 @@ def main():
     diff = get_staged_diff()
     
     # Generate commit message
-    commit_message = generate_commit_message(analysis, diff)
+    commit_message = generate_commit_message(analysis, diff, staged_files)
     
     # Display the message
     print("\n" + "=" * 70)
