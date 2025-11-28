@@ -1,0 +1,194 @@
+{
+    "festival_overview": {
+        "name": "Nuakhai",
+        "local_name": "Nuakhai Parab / Nuakhai Bhetghat",
+        "why_celebrated": "It is celebrated to welcome the new rice of the season and express gratitude to nature and deities for a bountiful harvest. Nuakhai also signifies a new beginning, fostering community harmony and strengthening family bonds.",
+        "short_story": "Nuakhai, meaning 'new food', symbolizes the consumption of the season's first harvest, primarily rice. Its origins trace back to ancient agrarian practices and Vedic rituals, with historical evidence suggesting its formalization around the 14th century by Chauhan King Ramai Deo to promote agriculture. The festival is deeply rooted in the culture of western Odisha, honoring the symbiotic relationship between humans, nature, and the divine.",
+        "themes": [
+            "Harvest",
+            "Gratitude",
+            "Family",
+            "Community",
+            "Renewal",
+            "Agriculture"
+        ],
+        "symbolism": [
+            "New rice (Nabanna)",
+            "Goddess Samaleswari (and other local deities)",
+            "Elders' blessings",
+            "Traditional sweets (Pitha)",
+            "New clothes",
+            "Exchange of greetings (Juhar)"
+        ],
+        "key_values": [
+            "Gratitude",
+            "Unity",
+            "Respect for elders",
+            "Community bonding",
+            "Tradition",
+            "Harmony"
+        ],
+        "family_roles": {
+            "elders": "Receive greetings and offer blessings for long life, happiness, and prosperity.",
+            "parents": "Lead the family rituals, offer prayers, and distribute the new harvest to family members.",
+            "children": "Participate in rituals, seek blessings from elders, and share in family meals."
+        },
+        "odisha_flavour": "Nuakhai is a major festival in Western Odisha, with celebrations marked by offering the first harvest (Nabanna) to presiding deities like Goddess Samaleswari. Families share feasts, and the 'Nuakhai Juhar' ritual of exchanging greetings and seeking blessings from elders is central to the celebrations. In Bhubaneswar, cultural events and gatherings are organized to celebrate the festival.",
+        "greetings": [
+            "Nuakhai Juhar!",
+            "Happy Nuakhai!",
+            "Samasta ku nuakhai ra hardika abhinandana (Hearty greetings of Nuakhai to all)!"
+        ]
+    },
+    "pre_festival": {
+        "ritual_preparation_steps": [
+            "Beheren: Announce the meeting to set the Nuakhai date.",
+            "Lagna dekha: Fix the exact auspicious time for partaking of the new rice.",
+            "Daka haka: Send out invitations to family and friends.",
+            "Sapha sutura and lipa puchha: Clean and decorate the house and surroundings.",
+            "Ghina bika: Purchase necessary items for the festival.",
+            "Nua dhan khuja: Select and gather the new harvest (paddy).",
+            "Bali paka: Prepare Prasad from the new harvest to offer to the deity.",
+            "Nuakhai: Offer the Prasad to the deity, then partake in the new rice with family.",
+            "Juhar bhet: Exchange greetings and seek blessings from elders."
+        ],
+        "puja_items_checklist": [
+            "New paddy harvested",
+            "Milk",
+            "Flowers (marigold, jasmine)",
+            "Ghee",
+            "Incense sticks (agarbatti)",
+            "Camphor",
+            "Sandalwood paste (chandan)",
+            "Kumkum (vermilion)",
+            "Rice (uncooked)",
+            "Betel leaves (paan)",
+            "Coconut",
+            "Fruits (five types)",
+            "Banana",
+            "Cotton wicks",
+            "Holy water (Gangajal)",
+            "Red cloth",
+            "Clay pots",
+            "Bamboo baskets",
+            "Aluminium foil roll",
+            "Murti or photo of the presiding deity (e.g., Goddess Lakshmi or village deity)"
+        ],
+        "food_preparation": [
+            "Arisa Pitha (a sweet rice cake, deep-fried)",
+            "Manda Pitha (steamed rice dumplings with sweet stuffing)",
+            "Ghanta Tarkari (a mixed vegetable curry with pumpkin, potatoes, beans, etc.)",
+            "Ambila (a sweet and sour curry with seasonal vegetables and tamarind)",
+            "Saru Saga (a leafy green dish, often with pumpkin leaves)",
+            "Muga Rasabara (fried moong dal balls soaked in syrup)",
+            "Kheeri (rice pudding made with new rice and milk)",
+            "Chaula Manda Pitha (steamed rice flour dumplings with coconut-jaggery stuffing)",
+            "Letha/Ambila (a traditional Odiya cuisine made with curd and vegetables)"
+        ],
+        "popular_places_to_visit": [
+            {
+                "place": "Nandankanan Zoological Park",
+                "suggestion": "A great place for families with a child to see various animals in a natural habitat. It also has a botanical garden and boating facilities."
+            },
+            {
+                "place": "Regional Science Centre",
+                "suggestion": "An interactive science museum offering hands-on exhibits that can be educational and fun for children."
+            },
+            {
+                "place": "Pathani Samanta Planetarium",
+                "suggestion": "Ideal for curious minds, this planetarium offers dome shows about space and astronomy. It's engaging for kids interested in stars and planets."
+            },
+            {
+                "place": "Odisha State Museum",
+                "suggestion": "Provides a glimpse into the state's rich history and culture with sections on tribal life, archaeology, and natural history. Children might find the tribal artifacts and dinosaur fossils interesting."
+            },
+            {
+                "place": "Ekamra Kanan Botanical Gardens",
+                "suggestion": "A serene green space perfect for a family stroll with a children's play area and a boating lake."
+            },
+            {
+                "place": "Indira Gandhi Park (IG Park)",
+                "suggestion": "A centrally located park with open lawns and a musical fountain, suitable for a relaxed family evening."
+            },
+            {
+                "place": "Udayagiri and Khandagiri Caves",
+                "suggestion": "These ancient rock-cut caves offer a sense of adventure and history. Kids might enjoy exploring and looking for carvings. Consider a guide for storytelling."
+            },
+            {
+                "place": "Lingaraj Temple",
+                "suggestion": "A prominent temple in Bhubaneswar, offering a spiritual and architectural experience. It's a significant landmark and part of the city's heritage. While visiting with a small child, focus on a brief, respectful visit."
+            },
+            {
+                "place": "Chilika Lake",
+                "suggestion": "A bit further from Bhubaneswar but a worthwhile family-friendly destination for its natural beauty, boating, and bird-watching opportunities. It's a great escape into nature."
+            }
+        ],
+        "schedule": {
+            "T-7_days": [
+                "Finalize guest list and send invitations.",
+                "Plan the menu and make a grocery list.",
+                "Purchase non-perishable puja items and decorations.",
+                "Book any necessary travel or accommodation.",
+                "Discuss and assign responsibilities within the family."
+            ],
+            "T-3_days": [
+                "Start deep cleaning the house and decorating.",
+                "Begin preparing sweets and snacks that can be stored.",
+                "Shop for fresh ingredients and remaining puja items.",
+                "Prepare the new paddy by cleaning and readying it for offerings.",
+                "Involve the child in age-appropriate festive preparations, like decorating."
+            ],
+            "T-1_day": [
+                "Cook traditional dishes that can be made in advance.",
+                "Prepare the Prasad ingredients.",
+                "Set up the puja area.",
+                "Iron new clothes for the family.",
+                "Final check of all arrangements and delegate last-minute tasks."
+            ]
+        },
+        "guest_or_travel_plan": {
+            "is_travel_suggested": true,
+            "note": "Nuakhai is a significant harvest festival, and many people travel to their native places to celebrate with family. If you are not from Bhubaneswar, consider traveling a few days in advance to experience the local festivities. For travel within Bhubaneswar, local transport and auto-rickshaws are available. If traveling with a small child, prioritize comfortable and efficient travel options. For guests, confirm their arrival and accommodation well in advance."
+        }
+    },
+    "festival_day": {
+        "early_morning": [
+            "Waking up early and taking a bath.",
+            "Performing morning prayers and rituals at home.",
+            "Preparing the special 'Nuakhai' offerings with the first harvested grains."
+        ],
+        "morning": [
+            "Offering the new harvest (Nua) to the household deity and family gods.",
+            "The head of the family performs the puja and offers prayers.",
+            "Family members partake in the 'Nua Khei' (eating of new rice) together, starting with the eldest.",
+            "Seeking blessings from elders by touching their feet (Nuakhai Juhar)."
+        ],
+        "mid_day": [
+            "Enjoying a grand feast with traditional Nuakhai dishes like Arisa Pitha, Manda Pitha, and Kheeri.",
+            "Community gatherings and feasts in villages or organized events in cities.",
+            "Exchanging gifts and greetings with relatives and friends."
+        ],
+        "evening": [
+            "Attending or organizing cultural programs featuring folk dances (like Dalkhai, Rasarkeli) and music.",
+            "Socializing with neighbors and community members.",
+            "Sharing stories and strengthening family bonds."
+        ],
+        "family_friendly_tips": [
+            "Involve children in the preparation of traditional sweets like Arisa Pitha, making it a fun activity.",
+            "Explain the significance of Nuakhai as a harvest festival and a time to express gratitude.",
+            "Assign small tasks to children, like helping to decorate the prayer area or serving Prasad.",
+            "Encourage children to participate in folk dances or songs during the evening celebrations.",
+            "Share stories about the importance of agriculture and the role of farmers in a simple and engaging way for children."
+        ]
+    },
+    "shareables": {
+        "puja_items_text": "✨ Nuakhai Puja Essentials ✨\n\nNew Clothes\nSweets & Fruits\nRice (New Harvest)\nIncense & Camphor\nFlowers & Garland\nDiya/Lamp\nWater\n\n#Nuakhai #Puja #FestivalPrep",
+        "tasks_text": "📋 Nuakhai To-Do List 📋\n\n1. Clean the house\n2. Prepare Prasad\n3. Decorate the altar\n4. Wear new clothes\n5. Offer prayers\n6. Family meal\n\n#NuakhaiPrep #FestivalTasks"
+    },
+    "metadata": {
+        "generated_at": "2024-07-28T12:00:00Z",
+        "location_context": "Bhubaneswar, Odisha, India",
+        "agent_version": "multi_agent_v1",
+        "language": "en"
+    }
+}

@@ -18,53 +18,216 @@ if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
 
+# Warm color palette: saffron, marigold, deep green
+COLORS = {
+    "saffron": "#F97316",
+    "saffron_light": "#FB923C",
+    "saffron_bg": "#FFF7ED",
+    "marigold": "#F59E0B",
+    "marigold_light": "#FCD34D",
+    "deep_green": "#166534",
+    "deep_green_light": "#16A34A",
+    "deep_green_bg": "#F0FDF4",
+}
+
+
 def render_theme_chips(themes: List[str]) -> None:
-    """Render festival themes as rounded colored chips."""
-    chip_html = ""
-    colors = ["#ea580c", "#f97316", "#16a34a", "#0ea5e9", "#a855f7"]
+    """Render festival themes as rounded colored chips in one line."""
+    colors = [COLORS["saffron"], COLORS["marigold"], COLORS["deep_green_light"], "#0EA5E9", "#A855F7"]
+    
+    # Build HTML string
+    chips_html = ""
     for i, theme in enumerate(themes):
         color = colors[i % len(colors)]
-        chip_html += f"""
-        <span style="
-            display:inline-block;
-            padding:4px 10px;
-            margin:3px;
-            border-radius:999px;
-            background:{color}22;
-            color:{color};
-            font-size:0.8rem;
-        ">{theme}</span>
-        """
-    st.markdown(chip_html, unsafe_allow_html=True)
+        # Escape any HTML in theme text
+        theme_escaped = theme.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        chips_html += f'<span style="display:inline-block;padding:6px 14px;margin:4px 6px 4px 0;border-radius:999px;background:{color}22;color:{color};font-size:0.85rem;font-weight:500;border:1px solid {color}44;white-space:nowrap;flex-shrink:0;">{theme_escaped}</span>'
+    
+    # Wrap in container div
+    container_html = f'<div style="white-space:nowrap;overflow-x:auto;display:flex;flex-wrap:nowrap;align-items:center;">{chips_html}</div>'
+    st.markdown(container_html, unsafe_allow_html=True)
 
 
 def render_festival_overview(data: Dict[str, Any]) -> None:
-    st.markdown("### 🪔 Festival Overview")
-    name = data.get("name", "")
-    local_name = data.get("local_name", "")
-    title = f"{name} · {local_name}" if local_name else name
-
-    col_left, col_right = st.columns([2, 1])
-    with col_left:
-        st.markdown(f"## {title}")
-        st.markdown(f"**Why celebrated:** {data.get('why_celebrated', '')}")
-        with st.expander("📖 Short Story"):
-            st.write(data.get("short_story", ""))
-        st.markdown("**Themes:**")
-        render_theme_chips(data.get("themes", []))
+    """Render the festival overview hero card."""
+    
+    # Hero card container
+    with st.container():
+        col_left, col_right = st.columns([2, 1])
+        
+        with col_left:
+            name = data.get("name", "")
+            local_name = data.get("local_name", "")
+            title = f"{name}"
+            if local_name:
+                title += f" · {local_name}"
+            
+            st.markdown(
+                f"""
+                <div style="
+                    background: linear-gradient(135deg, {COLORS['saffron']}, {COLORS['marigold']});
+                    padding: 24px;
+                    border-radius: 16px;
+                    margin-bottom: 16px;
+                    color: white;
+                ">
+                    <h1 style="margin:0; color:white; font-size:2.2rem;">{title}</h1>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            
+            why_celebrated = data.get("why_celebrated", "")
+            if why_celebrated:
+                st.markdown(f"**Why celebrated:** {why_celebrated}")
+            
+            # Story expander
+            short_story = data.get("short_story", "")
+            if short_story:
+                with st.expander("📖 Read the Story", expanded=False):
+                    st.write(short_story)
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            
+            # Themes
+            themes = data.get("themes", [])
+            if themes:
+                st.markdown("**Themes:**")
+                render_theme_chips(themes)
+            
+            # Symbolism
+            symbolism = data.get("symbolism", [])
+            if symbolism:
+                st.markdown("<br>", unsafe_allow_html=True)
+                st.markdown("**Symbolism:**")
+                icons = ["🌾", "🪔", "🎉", "🌸", "🍚", "🕯️", "🌿"]
+                for i, symbol in enumerate(symbolism):
+                    icon = icons[i % len(icons)]
+                    st.markdown(
+                        f"""
+                        <div style="
+                            margin-bottom: 14px;
+                            padding: 12px 16px;
+                            background: {COLORS['saffron_bg']};
+                            border-radius: 8px;
+                            border-left: 3px solid {COLORS['saffron']};
+                            display: flex;
+                            align-items: center;
+                            gap: 12px;
+                        ">
+                            <span style="font-size: 1.4rem; flex-shrink: 0;">{icon}</span>
+                            <span style="color: #333; font-size: 0.95rem; line-height: 1.5; flex: 1;">{symbol}</span>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+            
+            # Family Roles
+            family_roles = data.get("family_roles", {})
+            if family_roles:
+                st.markdown("<br>", unsafe_allow_html=True)
+                st.markdown("**Family Roles:**")
+                if family_roles.get("elders"):
+                    st.markdown(
+                        f"""
+                        <div style="
+                            margin-bottom: 16px;
+                            padding: 12px;
+                            background: {COLORS['saffron_bg']};
+                            border-radius: 8px;
+                            border-left: 4px solid {COLORS['saffron']};
+                        ">
+                            <div style="font-size: 1.3rem; margin-bottom: 6px;">👴 <strong>Elders</strong></div>
+                            <div style="color: #555; font-size: 0.9rem; line-height: 1.5; padding-left: 28px;">
+                                {family_roles['elders']}
+                            </div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+                if family_roles.get("parents"):
+                    st.markdown(
+                        f"""
+                        <div style="
+                            margin-bottom: 16px;
+                            padding: 12px;
+                            background: {COLORS['saffron_bg']};
+                            border-radius: 8px;
+                            border-left: 4px solid {COLORS['saffron']};
+                        ">
+                            <div style="font-size: 1.3rem; margin-bottom: 6px;">👨‍👩‍👧 <strong>Parents</strong></div>
+                            <div style="color: #555; font-size: 0.9rem; line-height: 1.5; padding-left: 28px;">
+                                {family_roles['parents']}
+                            </div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+                if family_roles.get("children"):
+                    st.markdown(
+                        f"""
+                        <div style="
+                            margin-bottom: 16px;
+                            padding: 12px;
+                            background: {COLORS['saffron_bg']};
+                            border-radius: 8px;
+                            border-left: 4px solid {COLORS['saffron']};
+                        ">
+                            <div style="font-size: 1.3rem; margin-bottom: 6px;">🧒 <strong>Children</strong></div>
+                            <div style="color: #555; font-size: 0.9rem; line-height: 1.5; padding-left: 28px;">
+                                {family_roles['children']}
+                            </div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+            
+            # Greetings
+            greetings = data.get("greetings", [])
+            if greetings:
+                st.markdown("<br>", unsafe_allow_html=True)
+                st.markdown("**Greetings:**")
+                for greeting in greetings:
+                    st.markdown(
+                        f"""
+                        <div style="
+                            display: inline-block;
+                            padding: 8px 16px;
+                            margin: 4px 8px 4px 0;
+                            border-radius: 8px;
+                            background: {COLORS['saffron_bg']};
+                            border: 1px solid {COLORS['saffron']}44;
+                            color: {COLORS['saffron']};
+                            font-weight: 500;
+                        ">
+                            🙏 {greeting}
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+        
     with col_right:
+            # Festival illustration placeholder
         st.markdown(
-            """
+                f"""
             <div style="
-                background:linear-gradient(135deg,#f97316,#fb923c);
-                border-radius:16px;
-                padding:16px;
-                text-align:center;
-                color:white;
-            ">
-              <div style="font-size:2rem;">🎉</div>
-              <div style="font-weight:600;">Festival Illustration</div>
-              <div style="font-size:0.8rem;opacity:0.9;">(Placeholder – use festival-specific art later)</div>
+                    background: linear-gradient(135deg, {COLORS['saffron_bg']}, {COLORS['deep_green_bg']});
+                    border-radius: 16px;
+                    padding: 32px 16px;
+                    text-align: center;
+                    border: 2px solid {COLORS['saffron']}44;
+                    height: 100%;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                ">
+                    <div style="font-size:4rem; margin-bottom:12px;">🪔</div>
+                    <div style="font-weight:600; color:{COLORS['deep_green']}; font-size:1.1rem;">
+                        {name if name else "Festival"}
+                    </div>
+                    <div style="font-size:0.85rem; color:#666; margin-top:8px;">
+                        Odisha Festival
+                    </div>
             </div>
             """,
             unsafe_allow_html=True,
@@ -72,294 +235,453 @@ def render_festival_overview(data: Dict[str, Any]) -> None:
 
 
 def render_pre_festival(data: Dict[str, Any]) -> None:
+    """Render pre-festival preparation section."""
     st.markdown("### 🪔 Pre‑Festival Preparation")
-    steps = data.get("ritual_preparation_steps", [])
-    puja_items = data.get("puja_items_checklist", [])
-    food = data.get("food_preparation", [])
-    places = data.get("popular_places_to_visit", [])
-    schedule = data.get("schedule", {})
-    travel = data.get("guest_or_travel_plan", {})
-
-    tab_steps, tab_puja, tab_food, tab_places, tab_schedule, tab_travel = st.tabs(
-        ["🧹 Ritual Steps", "🛕 Puja Items", "🍽️ Food", "🧭 Places", "🗓️ Schedule", "🚆 Guests / Travel"]
+    
+    # Tabs for different sections
+    tab_steps, tab_puja, tab_food, tab_places, tab_timeline, tab_travel = st.tabs(
+        ["🧹 Steps", "🛕 Puja Items", "🍽️ Food", "🧭 Places to Visit", "📅 Timeline", "🚆 Travel"]
     )
 
     with tab_steps:
-        for s in steps:
-            st.checkbox(s, value=False)
+        steps = data.get("ritual_preparation_steps", [])
+        if steps:
+            for i, step in enumerate(steps, 1):
+                st.markdown(f"☐ **{i}.** {step}")
 
     with tab_puja:
-        st.markdown("**Puja Items Checklist**")
-        icons = ["🪔", "🌸", "🕯️", "🍚", "🌿"]
-        for i, item in enumerate(puja_items):
-            icon = icons[i % len(icons)]
-            st.markdown(f"- {icon} {item}")
+        puja_items = data.get("puja_items_checklist", [])
+        if puja_items:
+            col1, col2 = st.columns(2)
+            mid = len(puja_items) // 2 + len(puja_items) % 2
+            with col1:
+                for item in puja_items[:mid]:
+                    st.markdown(f"🪔 {item}")
+            with col2:
+                for item in puja_items[mid:]:
+                    st.markdown(f"🪔 {item}")
 
     with tab_food:
-        for dish in food:
-            with st.expander(f"🍛 {dish.split('(')[0].strip()}"):
-                st.write(dish)
+        food = data.get("food_preparation", [])
+        if food:
+            for dish in food:
+                st.markdown(
+                    f"""
+                    <div style="
+                        background: {COLORS['saffron_bg']};
+                        padding: 12px 16px;
+                        border-radius: 8px;
+                        margin-bottom: 8px;
+                        border-left: 4px solid {COLORS['saffron']};
+                    ">
+                        🍛 {dish}
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
 
     with tab_places:
-        for place in places:
-            name = place.get("place", "")
-            suggestion = place.get("suggestion", "")
-            st.markdown(f"**📍 {name}**")
-            st.write(suggestion)
-            query = name.replace(" ", "+")
+        places = data.get("popular_places_to_visit", [])
+        if places:
+            for idx, place in enumerate(places, 1):
+                name = place.get("place", "")
+                suggestion = place.get("suggestion", "")
+                query = name.replace(" ", "+")
+                
+                st.markdown(
+                    f"""
+                    <div style="
+                        background: white;
+                        border-radius: 12px;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                        padding: 20px;
+                        margin-bottom: 20px;
+                        border-left: 4px solid {COLORS['deep_green_light']};
+                    ">
+                        <div style="
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            margin-bottom: 12px;
+                        ">
+                            <div style="
+                                font-weight: 600;
+                                color: {COLORS['deep_green']};
+                                font-size: 1.1rem;
+                                display: flex;
+                                align-items: center;
+                                gap: 8px;
+                            ">
+                                <span>📍</span>
+                                <span>{name}</span>
+                            </div>
+                        </div>
+                        <div style="
+                            color: #555;
+                            font-size: 0.95rem;
+                            line-height: 1.6;
+                            margin-bottom: 12px;
+                            padding-left: 28px;
+                        ">
+                            {suggestion}
+                        </div>
+                        <div style="padding-left: 28px;">
+                            <a href="https://www.google.com/maps/search/?api=1&query={query}" 
+                               target="_blank"
+                               style="
+                                   color: {COLORS['deep_green_light']};
+                                   text-decoration: none;
+                                   font-weight: 500;
+                                   font-size: 0.9rem;
+                               ">
+                                🗺️ Open in Google Maps →
+                            </a>
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+        else:
+            st.info("No places to visit information available")
+
+    with tab_timeline:
+        # Schedule timeline
+        schedule = data.get("schedule", {})
+        if schedule:
+            st.markdown("#### 📅 Timeline")
+            col_t7, col_t3, col_t1 = st.columns(3)
+            
+            with col_t7:
+                t7_items = schedule.get("T-7_days", [])
+                if t7_items:
+                    items_html = "".join([f"<li style='margin-bottom: 8px; color: #555;'>{item}</li>" for item in t7_items])
             st.markdown(
-                f"[Open in Google Maps](https://www.google.com/maps/search/?api=1&query={query})",
-                unsafe_allow_html=False,
-            )
-            st.markdown("---")
-
-    with tab_schedule:
-        st.markdown("**Timeline**")
-        def bullet(day_label: str, icon: str, items: List[str]) -> None:
-            if not items:
-                return
-            st.markdown(f"**{icon} {day_label}**")
-            for it in items:
-                st.markdown(f"- {it}")
-
-        bullet("T‑7 days", "📅", schedule.get("T-7_days", []))
-        bullet("T‑3 days", "📆", schedule.get("T-3_days", []))
-        bullet("T‑1 day", "⏰", schedule.get("T-1_day", []))
+                        f"""
+                        <div style="
+                            background: white;
+                            border-radius: 12px;
+                            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                            overflow: hidden;
+                            margin-bottom: 16px;
+                        ">
+                            <div style="
+                                background: {COLORS['saffron']};
+                                padding: 12px 16px;
+                                color: white;
+                                font-weight: 600;
+                                font-size: 0.95rem;
+                                display: flex;
+                                align-items: center;
+                                gap: 8px;
+                            ">
+                                <span>📅</span>
+                                <span>T-7 days</span>
+                            </div>
+                            <div style="padding: 16px;">
+                                <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
+                                    {items_html}
+                                </ul>
+                            </div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+            
+            with col_t3:
+                t3_items = schedule.get("T-3_days", [])
+                if t3_items:
+                    items_html = "".join([f"<li style='margin-bottom: 8px; color: #555;'>{item}</li>" for item in t3_items])
+                    st.markdown(
+                        f"""
+                        <div style="
+                            background: white;
+                            border-radius: 12px;
+                            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                            overflow: hidden;
+                            margin-bottom: 16px;
+                        ">
+                            <div style="
+                                background: {COLORS['marigold']};
+                                padding: 12px 16px;
+                                color: white;
+                                font-weight: 600;
+                                font-size: 0.95rem;
+                                display: flex;
+                                align-items: center;
+                                gap: 8px;
+                            ">
+                                <span>📆</span>
+                                <span>T-3 days</span>
+                            </div>
+                            <div style="padding: 16px;">
+                                <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
+                                    {items_html}
+                                </ul>
+                            </div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+            
+            with col_t1:
+                t1_items = schedule.get("T-1_day", [])
+                if t1_items:
+                    items_html = "".join([f"<li style='margin-bottom: 8px; color: #555;'>{item}</li>" for item in t1_items])
+                    st.markdown(
+                        f"""
+                        <div style="
+                            background: white;
+                            border-radius: 12px;
+                            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                            overflow: hidden;
+                            margin-bottom: 16px;
+                        ">
+                            <div style="
+                                background: {COLORS['deep_green_light']};
+                                padding: 12px 16px;
+                                color: white;
+                                font-weight: 600;
+                                font-size: 0.95rem;
+                                display: flex;
+                                align-items: center;
+                                gap: 8px;
+                            ">
+                                <span>⏰</span>
+                                <span>T-1 day</span>
+                            </div>
+                            <div style="padding: 16px;">
+                                <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
+                                    {items_html}
+                                </ul>
+                            </div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+        else:
+            st.info("No timeline schedule available")
 
     with tab_travel:
-        is_travel = bool(travel.get("is_travel_suggested", False))
-        note = travel.get("note", "")
-        badge_color = "#16a34a" if is_travel else "#f97316"
-        badge_text = "Travel Recommended" if is_travel else "Local Celebration"
-        st.markdown(
+        # Travel plan info box
+        travel = data.get("guest_or_travel_plan", {})
+        if travel.get("is_travel_suggested", False):
+            note = travel.get("note", "")
+            st.markdown(
             f"""
-            <span style="
-                display:inline-block;
-                padding:4px 12px;
-                border-radius:999px;
-                background:{badge_color}22;
-                color:{badge_color};
-                font-weight:600;
-                font-size:0.85rem;
-            ">{badge_text}</span>
+                <div style="
+                    background: {COLORS['deep_green_bg']};
+                    padding: 20px;
+                    border-radius: 12px;
+                    border-left: 4px solid {COLORS['deep_green_light']};
+                    margin-top: 16px;
+                ">
+                    <div style="font-weight:600; color:{COLORS['deep_green']}; margin-bottom:12px; font-size:1.1rem;">
+                        🚆 Travel Recommended
+                    </div>
+                    <div style="color:#555; line-height:1.6;">
+                        {note}
+                    </div>
+                </div>
             """,
             unsafe_allow_html=True,
         )
-        st.write(note)
+        else:
+            st.info("No travel recommendations for this festival")
 
 
 def render_festival_day(data: Dict[str, Any]) -> None:
+    """Render festival day experience with card-style sections."""
     st.markdown("### 📅 Festival‑Day Experience")
 
-    def section(title: str, icon: str, items: List[str]) -> None:
-        st.markdown(f"**{icon} {title}**")
-        for it in items:
-            st.markdown(f"- {it}")
-
-    section("Early Morning", "🌅", data.get("early_morning", []))
-    section("Morning", "🌞", data.get("morning", []))
-    section("Mid‑day", "🌤️", data.get("mid_day", []))
-    section("Evening", "🌙", data.get("evening", []))
-
+    # Timeline blocks with card styling
+    timeline_sections = [
+        ("Early Morning", "🌅", data.get("early_morning", []), COLORS["saffron"]),
+        ("Morning", "🌞", data.get("morning", []), COLORS["marigold"]),
+        ("Mid Day", "🌤️", data.get("mid_day", []), COLORS["deep_green_light"]),
+        ("Evening", "🌙", data.get("evening", []), "#0EA5E9"),
+    ]
+    
+    for title, icon, items, color in timeline_sections:
+        if items:
+            items_html = "".join([f"<li style='margin-bottom: 10px; color: #555; line-height: 1.5;'>{item}</li>" for item in items])
+            st.markdown(
+                f"""
+                <div style="
+                    background: white;
+                    border-radius: 12px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    overflow: hidden;
+                    margin-bottom: 20px;
+                ">
+                    <div style="
+                        background: {color};
+                        padding: 14px 18px;
+                        color: white;
+                        font-weight: 600;
+                        font-size: 1rem;
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                    ">
+                        <span style="font-size: 1.3rem;">{icon}</span>
+                        <span>{title}</span>
+                    </div>
+                    <div style="padding: 18px;">
+                        <ul style="margin: 0; padding-left: 20px; list-style-type: disc;">
+                            {items_html}
+                        </ul>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+    
+    # Family tips info box
     tips = data.get("family_friendly_tips", [])
     if tips:
         st.markdown(
-            """
+            f"""
             <div style="
-                margin-top:0.75rem;
-                padding:0.75rem 1rem;
-                border-radius:12px;
-                background:#022c22;
-                border:1px solid #16a34a55;
+                background: {COLORS['deep_green_bg']};
+                padding: 20px;
+                border-radius: 12px;
+                border: 2px solid {COLORS['deep_green_light']}44;
+                margin-top: 16px;
             ">
-              <div style="font-weight:600;margin-bottom:4px;">👨‍👩‍👧 Family‑friendly tips</div>
+                <div style="font-weight:600; color:{COLORS['deep_green']}; font-size:1.1rem; margin-bottom:12px;">
+                    👨‍👩‍👧 Family Tips
+                </div>
+            </div>
             """,
             unsafe_allow_html=True,
         )
         for tip in tips:
-            st.markdown(f"- {tip}")
-        st.markdown("</div>", unsafe_allow_html=True)
+            st.markdown(f"💡 {tip}")
 
 
-def render_copy_button(label: str, text: str, key: str) -> None:
-    """Render a HTML+JS button that copies `text` to clipboard."""
-    safe_text = text.replace("\\", "\\\\").replace("`", "\\`").replace('"', '\\"')
-    html = f"""
-    <button onclick="navigator.clipboard.writeText('{safe_text}');"
-            style="margin-right:8px;padding:6px 14px;border-radius:999px;
-                   background:#4f46e5;color:white;border:none;cursor:pointer;">
-      {label}
-    </button>
-    """
-    st.markdown(html, unsafe_allow_html=True)
-
-
-def render_shareables(data: Dict[str, Any]) -> None:
+def render_shareables(data: Dict[str, Any], pre_festival_data: Dict[str, Any]) -> None:
+    """Render shareable content with copy buttons."""
     st.markdown("### 📲 Shareables")
 
-    puja_text = data.get("puja_items_text", "")
+    # Get puja items from pre_festival data
+    puja_items = pre_festival_data.get("puja_items_checklist", [])
+    puja_text = "\n".join([f"• {item}" for item in puja_items]) if puja_items else ""
+    
     tasks_text = data.get("tasks_text", "")
 
-    st.markdown("**Puja Checklist**")
-    render_copy_button("Copy Puja Checklist", puja_text, "copy_puja")
-    st.code(puja_text or "(empty)", language="markdown")
-
-    st.markdown("**Task List**")
-    render_copy_button("Copy Task List", tasks_text, "copy_tasks")
-    st.code(tasks_text or "(empty)", language="markdown")
-
-    # WhatsApp share link placeholder
-    base_msg = textwrap.shorten(tasks_text or puja_text or "", width=300, placeholder="...")
-    import urllib.parse
-
-    wa_text = urllib.parse.quote_plus(base_msg or "Utsava Sathi festival plan.")
-    wa_url = f"https://wa.me/?text={wa_text}"
-    st.markdown(f"[Share via WhatsApp]({wa_url})")
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("**Things to purchase**")
+        if puja_text:
+            # Use HTML/JS for copy functionality
+            safe_text = puja_text.replace("'", "\\'").replace("\n", "\\n").replace("\r", "")
+            st.markdown(
+                f"""
+                <button onclick="navigator.clipboard.writeText('{safe_text}'); alert('Copied to clipboard!');" 
+                        style="
+                            background-color: {COLORS['saffron']};
+                            color: white;
+                            border: none;
+                            padding: 8px 16px;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            margin-bottom: 8px;
+                        ">
+                    📋 Copy to clipboard
+                </button>
+                """,
+                unsafe_allow_html=True,
+            )
+            st.text_area("Puja Items", value=puja_text, height=120, key="puja_display", label_visibility="collapsed")
+        else:
+            st.info("No puja items available")
+    
+    with col2:
+        st.markdown("**Tasks – Share Text**")
+        if tasks_text:
+            # Use HTML/JS for copy functionality
+            safe_text = tasks_text.replace("'", "\\'").replace("\n", "\\n").replace("\r", "")
+            st.markdown(
+                f"""
+                <button onclick="navigator.clipboard.writeText('{safe_text}'); alert('Copied to clipboard!');" 
+                        style="
+                            background-color: {COLORS['saffron']};
+                            color: white;
+                            border: none;
+                            padding: 8px 16px;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            margin-bottom: 8px;
+                        ">
+                    📋 Copy to clipboard
+                </button>
+                """,
+                unsafe_allow_html=True,
+            )
+            st.text_area("Tasks Share Text", value=tasks_text, height=120, key="tasks_display", label_visibility="collapsed")
+        else:
+            st.info("No tasks text available")
 
 
 def render_metadata(data: Dict[str, Any]) -> None:
-    st.markdown("---")
+    """Render metadata footer."""
     gen = data.get("generated_at", "")
     loc = data.get("location_context", "")
     ver = data.get("agent_version", "")
-    lang = data.get("language", "")
+    
+    # Format generated_at if it's a timestamp
+    if gen:
+        try:
+            from datetime import datetime
+            dt = datetime.fromisoformat(gen.replace("Z", "+00:00"))
+            gen = dt.strftime("%Y-%m-%d %H:%M:%S")
+        except:
+            pass
+    
     st.markdown(
-        f"Generated at: **{gen}** • {loc} • {ver} • {lang}",
+        f"""
+        <div style="
+            text-align: center;
+            color: #666;
+            font-size: 0.85rem;
+            padding: 16px;
+        ">
+            Generated at • {gen} • {loc} • {ver}
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
 
 def main() -> None:
     st.set_page_config(
-        page_title="Utsava Sathi – Odisha Festival Planner",
+        page_title="Utsava Sathi - Nuakhai",
         layout="wide",
         page_icon="🪔",
     )
 
-    default_json = '''{
-  "festival_overview": {
-    "name": "Nuakhai",
-    "local_name": "Nuakhai Parab / Nabanna",
-    "why_celebrated": "Nuakhai is an agricultural festival celebrated in Odisha to mark the consumption of the season's first harvested crops, especially rice. It's a thanksgiving to Mother Earth and the deities for a good harvest.",
-    "short_story": "Nuakhai, meaning 'new food', is deeply rooted in the agrarian culture of Odisha. Legend has it that the festival was started in the 14th century by Raja Ramai Deo to encourage farming. It signifies a new beginning, unity, and gratitude for nature's bounty. The celebration involves offering the first grains to the presiding deity, followed by a family feast and exchange of greetings.",
-    "themes": [
-      "Harvest Festival",
-      "Gratitude",
-      "New Beginnings",
-      "Family Unity",
-      "Agricultural Prosperity"
-    ]
-  },
-  "pre_festival": {
-    "ritual_preparation_steps": [
-      "Clean and decorate the house (Safa Sutura and Lipa Puchha).",
-      "Adorn verandahs and mud walls with 'Jhuti' (rice powder designs).",
-      "Purchase new clothes for all family members.",
-      "Prepare for traditional dishes, especially sweets (Pitha) and savory items.",
-      "Families living away often plan to return to their native places for the festival."
-    ],
-    "puja_items_checklist": [
-      "Newly harvested rice (Nua Dhan)",
-      "Fruits",
-      "Flowers",
-      "Sandalwood paste",
-      "Incense sticks",
-      "Camphor",
-      "Diyas (oil lamps)",
-      "New clothes for deities (optional)",
-      "Sweets and other prasad items"
-    ],
-    "food_preparation": [
-      "Prepare traditional sweets like Arisa Pitha, Manda Pitha, Kakara Pitha.",
-      "Make savory dishes like Ghanta Tarkari, Bhendi Kardi Khatta.",
-      "Prepare rice pudding (Kheeri) and Muga Rasabara.",
-      "Non-vegetarian dishes, especially mutton curry, are also prepared by some families.",
-      "Ensure fresh, locally sourced ingredients are used."
-    ],
-    "popular_places_to_visit": [
-      {
-        "place": "Lingaraj Temple",
-        "suggestion": "Visit early in the morning for a serene experience. Families can offer prayers and witness the temple's grandeur."
-      },
-      {
-        "place": "Mukteswara Temple",
-        "suggestion": "Known for its intricate Kalinga architecture, it's a beautiful and peaceful place for a family visit."
-      },
-      {
-        "place": "Nandankanan Zoological Park",
-        "suggestion": "A great place for children to see a variety of animals and enjoy a day out. Offers a 'zoo safari' experience."
-      },
-      {
-        "place": "Ekamra Kanan Botanical Garden",
-        "suggestion": "Explore diverse plant collections. It's a peaceful spot for a family picnic and has play areas for kids."
-      },
-      {
-        "place": "Regional Science Centre",
-        "suggestion": "Engaging interactive exhibits and shows for children, making learning fun."
-      }
-    ],
-    "schedule": {
-      "T-7_days": [
-        "Begin house cleaning and minor repairs.",
-        "Start planning the menu for the festival feast.",
-        "Purchase necessary ingredients for sweets and dishes."
-      ],
-      "T-3_days": [
-        "Buy new clothes for the family.",
-        "Decorate the house with 'Jhuti' or other traditional art.",
-        "Prepare some sweets or savories that can be stored."
-      ],
-      "T-1_day": [
-        "Finalize all food preparations.",
-        "Prepare the puja items.",
-        "Ensure all family members are ready and comfortable for the next day.",
-        "If traveling from afar, ensure travel arrangements are complete."
-      ]
-    },
-    "guest_or_travel_plan": {
-      "is_travel_suggested": true,
-      "note": "It is customary for family members, even those living in cities, to return to their native villages or homes to celebrate Nuakhai with their elders and the extended family."
-    }
-  },
-  "festival_day": {
-    "early_morning": [
-      "Wake up early and take a ritual bath.",
-      "Wear new clothes.",
-      "Perform morning prayers and offer the 'Nua' (newly harvested rice) to the household deity or the presiding deity of the area/village."
-    ],
-    "morning": [
-      "The eldest member of the family distributes the 'Nua' (prasad) to all family members.",
-      "The family partakes in the feast, starting with the new rice and traditional dishes.",
-      "Junior members of the family offer greetings and seek blessings from elders ('Nuakhai Juhar')."
-    ],
-    "mid_day": [
-      "Enjoy the festive meal with family.",
-      "Relax and spend quality time together.",
-      "Some families might visit local temples to offer prayers."
-    ],
-    "evening": [
-      "Exchange greetings and well wishes with relatives, friends, and neighbors ('Nuakhai Juhar').",
-      "Participate in community gatherings or 'Nuakhai Bhetghat' which may include folk dances and songs.",
-      "Enjoy the festive atmosphere and the shared joy of the harvest."
-    ],
-    "family_friendly_tips": [
-      "Involve the child in simple pre-festival activities like decorating or helping with mild food prep.",
-      "Explain the significance of Nuakhai in a way the child can understand.",
-      "During the festival day, keep the rituals engaging for the child, perhaps by explaining the meaning of 'Nuakhai Juhar'.",
-      "Visit family-friendly places like Nandankanan Zoological Park or Ekamra Kanan Botanical Garden for a day out.",
-      "Ensure the child gets to taste traditional sweets and dishes prepared for the festival."
-    ]
-  },
-  "shareables": {
-    "puja_items_text": "For Nuakhai, you'll need the newly harvested rice (Nua Dhan), along with offerings like fruits, flowers, incense, and camphor. Don't forget new clothes for prayers and delicious prasad items. #Nuakhai #OdishaFestival #HarvestFestival",
-    "tasks_text": "Get ready for Nuakhai! Clean and decorate your home, buy new clothes, and prepare delicious traditional dishes. Families often travel back home for this special harvest festival. #NuakhaiPrep #FestivalVibes #OdishaCulture"
-  },
-  "metadata": {
-    "generated_at": "2025-11-28T11:53:13.800978Z",
-    "location_context": "Bhubaneswar, Odisha, India",
-    "agent_version": "utsava_sathi_festival_planner",
-    "language": "en"
-  }
-}'''
+    # Custom CSS for warm palette
+    st.markdown(
+        f"""
+        <style>
+        .main {{
+            background-color: #FFFBF5;
+        }}
+        .stButton>button {{
+            background-color: {COLORS['saffron']};
+            color: white;
+            border-radius: 8px;
+            border: none;
+            padding: 8px 16px;
+        }}
+        .stButton>button:hover {{
+            background-color: {COLORS['saffron_light']};
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
     left, right = st.columns([1, 2])
 
@@ -372,52 +694,108 @@ def main() -> None:
         )
         use_agent = st.button("✨ Generate via Gemini Agent")
 
-        import json as _json
-
         plan: Dict[str, Any] = {}
 
         if use_agent and prompt.strip():
-            with st.spinner("Calling Utsava Sathi API..."):
-                try:
-                    logging.info(f"Calling Utsava Sathi API with prompt: {prompt.strip()}")
-                    resp = requests.post(
-                        "http://127.0.0.1:8006/plan",
-                        json={
-                          "prompt": prompt.strip(),
-                          "use_multi_agent": True
-                        },
-                        timeout=60,
-                    )
-                    resp.raise_for_status()
-                    plan = resp.json()
-                    st.success("FestivalPlan generated from agent.")
-                except requests.exceptions.Timeout as e:
-                    st.error(f"API call timed out after 60 seconds: {e}")
-                except requests.exceptions.ConnectionError as e:
-                    st.error(f"Could not connect to API server. Is it running? Error: {e}")
-                except requests.exceptions.HTTPError as e:
-                    st.error(f"API returned an error (HTTP {resp.status_code}): {e}")
-                except requests.exceptions.RequestException as e:
-                    st.error(f"API request failed: {e}")
-                except json.JSONDecodeError as e:
-                    st.error(f"Invalid JSON response from API: {e}")
-                except Exception as e:
-                    st.error(f"Unexpected error: {e}")
-                    plan = {}
-
+            progress_bar = st.progress(0)
+            status_text = st.empty()
+            status_text.info("🔄 Initializing multi-agent system...")
+            
+            try:
+                logging.info(f"Calling Utsava Sathi API with prompt: {prompt.strip()}")
+                progress_bar.progress(10)
+                status_text.info("🔄 Calling coordinator agent...")
+                
+                resp = requests.post(
+                    "http://127.0.0.1:8006/plan",
+                    json={
+                        "prompt": prompt.strip(),
+                        "use_multi_agent": True
+                    },
+                    timeout=180,  # Increased timeout for multi-agent execution
+                )
+                progress_bar.progress(90)
+                status_text.info("✅ Processing response...")
+                
+                resp.raise_for_status()
+                plan = resp.json()
+                progress_bar.progress(100)
+                status_text.empty()
+                progress_bar.empty()
+                st.success("✅ FestivalPlan generated from agent!")
+            except requests.exceptions.Timeout as e:
+                progress_bar.empty()
+                status_text.empty()
+                st.error(
+                    f"⏱️ API call timed out after 180 seconds. "
+                    f"The multi-agent system may be taking longer than expected. "
+                    f"Please try again or use a simpler query."
+                )
+                st.info("💡 Tip: The multi-agent system calls 4 agents sequentially, which can take time.")
+                plan = {}
+            except requests.exceptions.ConnectionError as e:
+                progress_bar.empty()
+                status_text.empty()
+                st.error(f"🔌 Could not connect to API server. Is it running on http://127.0.0.1:8006?")
+                st.info("💡 Make sure the API server is running: `cd ui && uvicorn api:app --port 8006`")
+                plan = {}
+            except requests.exceptions.HTTPError as e:
+                progress_bar.empty()
+                status_text.empty()
+                st.error(f"❌ API returned an error (HTTP {resp.status_code}): {e}")
+                plan = {}
+            except requests.exceptions.RequestException as e:
+                progress_bar.empty()
+                status_text.empty()
+                st.error(f"❌ API request failed: {e}")
+                plan = {}
+            except json.JSONDecodeError as e:
+                progress_bar.empty()
+                status_text.empty()
+                st.error(f"❌ Invalid JSON response from API: {e}")
+                plan = {}
+            except Exception as e:
+                progress_bar.empty()
+                status_text.empty()
+                st.error(f"❌ Unexpected error: {e}")
+                plan = {}
 
     with right:
+        # Try to load sample data if no plan from API
+        if not plan:
+            sample_path = ROOT_DIR / "sample_data" / "nuakhai.json"
+            if sample_path.exists():
+                try:
+                    with open(sample_path, "r", encoding="utf-8") as f:
+                        plan = json.load(f)
+                    st.info("📄 Displaying sample data from nuakhai.json")
+                except Exception as e:
+                    st.warning(f"Could not load sample data: {e}")
+        
         if plan:
-            render_festival_overview(plan.get("festival_overview", {}))
-            render_pre_festival(plan.get("pre_festival", {}))
-            render_festival_day(plan.get("festival_day", {}))
-            render_shareables(plan.get("shareables", {}))
-            render_metadata(plan.get("metadata", {}))
+            # Create tabs for main sections
+            tab_overview, tab_prefestival, tab_festivalday, tab_shareables = st.tabs([
+                "🪔 Overview",
+                "📋 Pre-Festival",
+                "📅 Festival Day",
+                "📲 Shareables"
+            ])
+            
+            with tab_overview:
+                render_festival_overview(plan.get("festival_overview", {}))
+                render_metadata(plan.get("metadata", {}))
+            
+            with tab_prefestival:
+                render_pre_festival(plan.get("pre_festival", {}))
+            
+            with tab_festivalday:
+                render_festival_day(plan.get("festival_day", {}))
+            
+            with tab_shareables:
+                render_shareables(plan.get("shareables", {}), plan.get("pre_festival", {}))
         else:
             st.info("Awaiting valid FestivalPlan JSON or agent output...")
 
 
 if __name__ == "__main__":
     main()
-
-
