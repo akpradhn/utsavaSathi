@@ -56,17 +56,18 @@ It:
 🧠 Maintains session history and memory for personalization  
 📋 Generates shareable content for messaging and social media  
 
-The system currently supports a curated set of major festivals such as:  
-- Makar Sankranti  
-- Maha Shivratri  
-- Holi  
-- Raja Parba *(Odisha specific)*  
-- Rath Yatra *(Odisha specific)*  
-- Janmashtami  
-- Durga Puja  
-- Diwali  
-- Kartika Purnima  
-- Christmas / New Year  
+**Festival Coverage:**  
+The system can handle **any Indian festival** in real-time, not just a predefined list. Using Google Search integration and multi-agent orchestration, it dynamically researches and plans for festivals including (but not limited to):
+
+- **Pan-India Festivals**: Makar Sankranti, Maha Shivratri, Holi, Janmashtami, Durga Puja, Diwali, Kartika Purnima, Christmas / New Year
+- **Regional Festivals**: Raja Parba, Rath Yatra *(Odisha specific)*, Pongal, Onam, Baisakhi, and many more
+- **Local & Community Festivals**: Any regional or community-specific celebration
+
+The multi-agent system's robust architecture ensures accurate planning for any festival by:
+- Real-time research via Google Search
+- Cultural context awareness (especially Odisha traditions)
+- Adaptive planning based on festival type and family context
+- Comprehensive coverage of rituals, food, places, and timelines  
 
 **Current Features**
 - ✅ Multi-agent orchestration with Google ADK

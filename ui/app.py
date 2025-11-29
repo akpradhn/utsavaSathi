@@ -763,17 +763,7 @@ def main() -> None:
                 plan = {}
 
     with right:
-        # Try to load sample data if no plan from API
-        if not plan:
-            sample_path = ROOT_DIR / "sample_data" / "nuakhai.json"
-            if sample_path.exists():
-                try:
-                    with open(sample_path, "r", encoding="utf-8") as f:
-                        plan = json.load(f)
-                    st.info("📄 Displaying sample data from nuakhai.json")
-                except Exception as e:
-                    st.warning(f"Could not load sample data: {e}")
-        
+        # Display plan if available, otherwise show blank state
         if plan:
             # Create tabs for main sections
             tab_overview, tab_prefestival, tab_festivalday, tab_shareables = st.tabs([
